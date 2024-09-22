@@ -4,7 +4,7 @@ This is a java agent for Gradle `distributionUrl` property global mirror setting
 
 # How to Use
 
-1. Download the agent jar here
+1. Download the agent jar [here](https://github.com/CarefulDeveloper/GradleAgent/releases/latest/download/GradleAgent.jar)
 
 2. edit the system environment variable like this:
 
