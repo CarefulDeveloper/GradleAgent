@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "org.tingy"
-version = "1.0"
+version = "1.1"
 
 dependencies {
     implementation("net.bytebuddy:byte-buddy:1.15.1")
