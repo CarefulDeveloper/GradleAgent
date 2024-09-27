@@ -6,14 +6,16 @@ import java.net.URI
 import java.util.concurrent.Callable
 
 private val DISTRIBUTION_REGEX =
-    Regex("gradle-(?<version>[0-9]+\\.[0-9]+(-(rc|milestone)-[0-9]+)?)-(?<type>all|bin|src).zip$")
+    Regex("^https?://.*\\.gradle\\.org/.*/gradle-(?<version>[0-9]+(\\.[0-9]+){1,2}(-(rc|milestone)-[0-9]+)?)-(?<type>all|bin|src).zip$")
 
 class WrapperExecutorInterceptor(
     private val mirrorTemplateUrl: String
 ) {
 
+    @Suppress("unused")
     @RuntimeType
     fun intercept(
+        @Suppress("UNUSED_PARAMETER")
         @Origin method: Method,
         @SuperCall callable: Callable<*>
     ): Any {
@@ -22,7 +24,7 @@ class WrapperExecutorInterceptor(
             val originStr = origin.toString()
             val mirror = getMirrorUrl(originStr)
             return if(mirror == null) {
-                println("> Gradle Agent:\nDistribution [$originStr] is not recognized\n")
+                println("> Gradle Agent:\nDistribution [$originStr] is not official url, skip\n")
                 origin
             } else {
                 println("> Gradle Agent:\nDistribution [$originStr] is mirrored to [$mirror]\n")
