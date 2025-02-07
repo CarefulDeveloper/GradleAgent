@@ -1,6 +1,11 @@
+import org.gradle.api.internal.FeaturePreviews
+
 dependencyResolutionManagement {
     repositories {
+        gradlePluginPortal()
         mavenCentral()
+        // not used. gradle project maven repository
+        maven("https://repo.gradle.org/artifactory/libs-releases/")
     }
 }
 
@@ -20,4 +25,4 @@ pluginManagement {
 }
 
 rootProject.name = "GradleAgent"
-
+enableFeaturePreview(FeaturePreviews.Feature.TYPESAFE_PROJECT_ACCESSORS.name)

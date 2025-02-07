@@ -10,13 +10,18 @@ fun main() {
 }
 
 fun premain(args: String?, instrumentation: Instrumentation) {
-    if (args == null) {
-        println("> Gradle Agent:\nMirror url template is null\n")
+    val mirrorUrlTemplate = System.getenv("GRADLE_DISTRIBUTION_URL_TEMPLATE")
+    if (mirrorUrlTemplate == null) {
+        println(
+            "> Gradle Agent:\nThe environment variable GRADLE_DISTRIBUTION_URL_TEMPLATE is not specified. " +
+                    "Please set it to a valid URL template. " +
+                    "For example: https://mirror.host.com/gradle/gradle-%1\$s-%2\$s.zip. \n"
+        )
         return
     }
 
     AgentBuilder.Default().type(ElementMatchers.named(TARGET_CLASS_NAME)).transform { builder, _, _, _, _ ->
         builder.method(ElementMatchers.named("readDistroUrl"))
-            .intercept(MethodDelegation.to(WrapperExecutorInterceptor(args)))
+            .intercept(MethodDelegation.to(WrapperExecutorInterceptor(mirrorUrlTemplate)))
     }.installOn(instrumentation)
 }
