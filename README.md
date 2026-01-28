@@ -26,7 +26,7 @@ This is a java agent for Gradle `distributionUrl` property global mirror setting
    ```
    GRADLE_DISTRIBUTION_URL_TEMPLATE = https://www.mirrror.host.com/gradle/gradle-%1$s-%2$s.zip
    ```
-   `%1$s` will be fill with the gradle version info, like `8.8`; `%2$s` will be filled with distribution type, like `all` `bin`.
+   `%1$s` will be fill with the Gradle version info, like `8.8`; `%2$s` will be filled with distribution type, like `all` `bin`.
 
 4. restart terminal or JetBrains IDE
 
@@ -35,6 +35,13 @@ This is a java agent for Gradle `distributionUrl` property global mirror setting
 5. sync Gradle and observe the output of Gradle.
 
    if you never use this version of Gradle, you should see it download the Gradle distribution from the mirror website.
+
+# How to Build
+
+Use Gradle task to build the final jar file.
+
+- `:shadowJar` build debug agent jar file at `build/libs/GradleAgent-x.x-all.jar`
+- `:buildRelease` build release agent jar file at `build/libs/GradleAgent-x.x-all-release.jar`
 
 # Thanks
 

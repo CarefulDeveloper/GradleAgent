@@ -1,8 +1,10 @@
-# Keep our entry code
--keep public class MainKt {
+# Keep jvm entry code
+-keep public class org.tingy.agent.gradle.MainKt {
     *;
 }
--keep public class WrapperExecutorInterceptor {
+
+# Keep inject entry code
+-keep public class org.tingy.agent.gradle.UrlReplacer {
     *;
 }
 
