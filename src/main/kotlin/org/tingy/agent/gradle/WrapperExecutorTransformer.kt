@@ -5,7 +5,6 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
-import org.objectweb.asm.commons.AdviceAdapter
 
 object WrapperExecutorTransformer {
 
@@ -29,81 +28,66 @@ object WrapperExecutorTransformer {
 
                 if (name != "readDistroUrl") return mv
 
-                return object : AdviceAdapter(ASM9, mv, access, name, descriptor) {
-
-                    override fun onMethodExit(opcode: Int) {
-                        if (opcode != ARETURN) return
-
-                        when (descriptor) {
-
-                            "()Ljava/lang/String;" -> {
-                                // stack: [String]
-                                visitFieldInsn(
-                                    GETSTATIC,
-                                    "org/tingy/agent/gradle/UrlReplacer",
-                                    "INSTANCE",
-                                    "Lorg/tingy/agent/gradle/UrlReplacer;"
-                                )
-                                visitInsn(SWAP)
-                                visitMethodInsn(
-                                    INVOKEVIRTUAL,
-                                    "org/tingy/agent/gradle/UrlReplacer",
-                                    "replace",
-                                    "(Ljava/lang/String;)Ljava/lang/String;",
-                                    false
-                                )
-                            }
-
-                            "()Ljava/net/URI;" -> {
-                                // stack: [URI]
-
-                                visitInsn(DUP)
-                                visitMethodInsn(
-                                    INVOKEVIRTUAL,
-                                    "java/net/URI",
-                                    "toString",
-                                    "()Ljava/lang/String;",
-                                    false
-                                )
-
-                                // stack: [URI, String]
-                                visitFieldInsn(
-                                    GETSTATIC,
-                                    "org/tingy/agent/gradle/UrlReplacer",
-                                    "INSTANCE",
-                                    "Lorg/tingy/agent/gradle/UrlReplacer;"
-                                )
-                                visitInsn(SWAP)
-
-                                // stack: [URI, INSTANCE, String]
-                                visitMethodInsn(
-                                    INVOKEVIRTUAL,
-                                    "org/tingy/agent/gradle/UrlReplacer",
-                                    "replace",
-                                    "(Ljava/lang/String;)Ljava/lang/String;",
-                                    false
-                                )
-
-                                // stack: [URI, String]
-                                visitTypeInsn(NEW, "java/net/URI")
-                                visitInsn(DUP_X1)
-                                visitInsn(SWAP)
-                                visitMethodInsn(
-                                    INVOKESPECIAL,
-                                    "java/net/URI",
-                                    "<init>",
-                                    "(Ljava/lang/String;)V",
-                                    false
-                                )
-                                // stack: [URI]
-                            }
-                        }
-                    }
-                }
+                return ReplaceReturnValueVisitor(mv)
             }
         }
 
         cr.accept(cv, ClassReader.EXPAND_FRAMES)
         return cw.toByteArray()
+    }
+
+
+    /**
+     * Replace return value of org/tingy/agent/gradle/WrapperExecutor.getProperty
+     *
+     * key instruction:
+     * ```
+     * INVOKESPECIAL org/tingy/agent/gradle/WrapperExecutor.getProperty (Ljava/lang/String;)Ljava/lang/String;
+     * ```
+     * @param targetOrder The order of the target instruction should be replaced, start from 1.
+     */
+    private class ReplaceReturnValueVisitor(
+        mv: MethodVisitor,
+        private val targetOrder: Int = 1
+    ) : MethodVisitor(Opcodes.ASM9, mv) {
+
+        private var count = 0
+
+        override fun visitMethodInsn(
+            opcode: Int,
+            owner: String?,
+            name: String?,
+            descriptor: String?,
+            isInterface: Boolean
+        ) {
+            super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
+            // stack [... String]
+
+            if (opcode == Opcodes.INVOKESPECIAL
+                && "org/gradle/wrapper/WrapperExecutor" == owner
+                && "getProperty" == name
+                && "(Ljava/lang/String;)Ljava/lang/String;" == descriptor
+            ) {
+                if (++count == targetOrder) {
+                    super.visitFieldInsn(
+                        Opcodes.GETSTATIC,
+                        "org/tingy/agent/gradle/UrlReplacer",
+                        "INSTANCE",
+                        "Lorg/tingy/agent/gradle/UrlReplacer;"
+                    )
+                    // stack [... String, UrlReplacer]
+                    super.visitInsn(Opcodes.SWAP)
+                    // stack [... UrlReplacer, String]
+                    super.visitMethodInsn(
+                        Opcodes.INVOKEVIRTUAL,
+                        "org/tingy/agent/gradle/UrlReplacer",
+                        "replace",
+                        "(Ljava/lang/String;)Ljava/lang/String;",
+                        false
+                    )
+                    // stack [... String]
+                }
+            }
+        }
     }
 }

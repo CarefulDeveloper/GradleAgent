@@ -21,13 +21,13 @@ class WrapperExecutorTransformerTest {
     fun `transform wrapper v1`() {
         val bytes = WrapperExecutorTransformer.transform(bWrapperExecutorV1)
         assertNotNull(bytes)
-        File(classDir, "WrapperExecutor.class").writeBytes(bytes)
+        File(classDir, "WrapperExecutor.v1.class").writeBytes(bytes)
     }
 
     @Test
     fun `transform wrapper v2`() {
         val bytes = WrapperExecutorTransformer.transform(bWrapperExecutorV2)
         assertNotNull(bytes)
-        File(classDir, "WrapperExecutor.class").writeBytes(bytes)
+        File(classDir, "WrapperExecutor.v2.class").writeBytes(bytes)
     }
 }

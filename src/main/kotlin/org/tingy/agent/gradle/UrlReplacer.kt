@@ -24,8 +24,8 @@ object UrlReplacer {
         }
 
         val newUrl = String.format(System.getenv("GRADLE_DISTRIBUTION_URL_TEMPLATE"), version, type)
-        log("[replace] Distribution [$url] is mirrored to [$url]")
-        println("> Gradle Agent:\nDistribution [$url] is mirrored to [$url]\n")
+        log("[replace] Distribution [$url] is mirrored to [$newUrl]")
+        println("> Gradle Agent:\nDistribution [$url] is mirrored to [$newUrl]\n")
         return newUrl
     }
 }
