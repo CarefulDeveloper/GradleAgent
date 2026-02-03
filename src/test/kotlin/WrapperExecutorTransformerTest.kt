@@ -12,10 +12,13 @@ class WrapperExecutorTransformerTest {
     }
 
     private val bWrapperExecutorV1: ByteArray
-        get() = ClassLoader.getSystemResourceAsStream("WrapperExecutor.v1.class")!!.readBytes()
+        get() = readClassBytes("WrapperExecutor.v1.class")
 
     private val bWrapperExecutorV2: ByteArray
-        get() = ClassLoader.getSystemResourceAsStream("WrapperExecutor.v2.class")!!.readBytes()
+        get() = readClassBytes("WrapperExecutor.v2.class")
+
+    private val bWrapperExecutorV3: ByteArray
+        get() = readClassBytes("WrapperExecutor.v3.class")
 
     @Test
     fun `transform wrapper v1`() {
@@ -30,4 +33,13 @@ class WrapperExecutorTransformerTest {
         assertNotNull(bytes)
         File(classDir, "WrapperExecutor.v2.class").writeBytes(bytes)
     }
+
+    @Test
+    fun `transform wrapper v3`() {
+        val bytes = WrapperExecutorTransformer.transform(bWrapperExecutorV3)
+        assertNotNull(bytes)
+        File(classDir, "WrapperExecutor.v3.class").writeBytes(bytes)
+    }
+
+    private fun readClassBytes(name: String) = ClassLoader.getSystemResourceAsStream(name)!!.readBytes()
 }

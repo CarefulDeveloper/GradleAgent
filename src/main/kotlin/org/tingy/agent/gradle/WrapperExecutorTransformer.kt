@@ -43,6 +43,7 @@ object WrapperExecutorTransformer {
      * key instruction:
      * ```
      * INVOKESPECIAL org/tingy/agent/gradle/WrapperExecutor.getProperty (Ljava/lang/String;)Ljava/lang/String;
+     * INVOKEVIRTUAL org/tingy/agent/gradle/WrapperExecutor.getProperty (Ljava/lang/String;Ljava/lang/String;Z)Ljava/lang/String;
      * ```
      * @param targetOrder The order of the target instruction should be replaced, start from 1.
      */
@@ -63,10 +64,10 @@ object WrapperExecutorTransformer {
             super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
             // stack [... String]
 
-            if (opcode == Opcodes.INVOKESPECIAL
-                && "org/gradle/wrapper/WrapperExecutor" == owner
+            if ("org/gradle/wrapper/WrapperExecutor" == owner
                 && "getProperty" == name
-                && "(Ljava/lang/String;)Ljava/lang/String;" == descriptor
+                && TARGET_OPCODES.contains(opcode)
+                && TARGET_DESCRIPTORS.contains(descriptor)
             ) {
                 if (++count == targetOrder) {
                     super.visitFieldInsn(
@@ -88,6 +89,14 @@ object WrapperExecutorTransformer {
                     // stack [... String]
                 }
             }
+        }
+
+        companion object {
+            private val TARGET_OPCODES = intArrayOf(Opcodes.INVOKESPECIAL, Opcodes.INVOKEVIRTUAL)
+            private val TARGET_DESCRIPTORS = listOf(
+                "(Ljava/lang/String;)Ljava/lang/String;",
+                "(Ljava/lang/String;Ljava/lang/String;Z)Ljava/lang/String;",
+            )
         }
     }
 }

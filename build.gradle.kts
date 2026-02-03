@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "org.tingy"
-version = "1.4"
+version = "1.5"
 
 dependencies {
     implementation("org.ow2.asm:asm:9.7")
